@@ -1,28 +1,146 @@
 "use client";
 
-import { Form, Input, Radio, Space, Statistic, Table } from "antd";
+import {
+  Card,
+  Col,
+  Form,
+  InputNumber,
+  List,
+  Radio,
+  Row,
+  Space,
+  Statistic,
+  Table,
+} from "antd";
 
 import "./global.css";
 import { useEffect } from "react";
-
-enum Gender {
-  /** 男性 */
-  Male = "Male",
-  /** 女性 */
-  Female = "Female",
-}
-
-enum BodyType {
-  /** 外胚型 */
-  Ectomorph = "Ectomorph",
-  /** 中胚型 */
-  Mesomorph = "Mesomorph",
-  /** 内胚型 */
-  Endomorph = "Endomorph",
-}
+import {
+  BODY_TYPE_OPTIONS,
+  BodyType,
+  CARBOHYDRATE_CYCLE_CLASS_OPTIONS,
+  CarbohydrateCycleClass,
+  Day,
+  GENDER_OPTIONS,
+  NUTRITION_BASE,
+  NUTRITION_ENERGY,
+  NUTRITION_RATIO,
+  STAT_OPTIONS,
+  StatMeta,
+} from "./lib/constant";
+import { NutritionStat, TrainVariables } from "./lib/type";
+import { getLocalStorage, setLocalStorage } from "./lib/storage";
 
 export default function Home() {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<TrainVariables>();
+
+  const bodyType = Form.useWatch(["basicInfo", "bodyType"], form);
+  const weight = Form.useWatch(["basicInfo", "weight"], form);
+  const targetWeight = Form.useWatch(["basicInfo", "targetWeight"], form);
+  const carbohydrateBase = Form.useWatch(
+    ["nutritionBase", "carbohydrateBase"],
+    form
+  );
+  const fatBase = Form.useWatch(["nutritionBase", "fatBase"], form);
+  const proteinBase = Form.useWatch(["nutritionBase", "proteinBase"], form);
+  const lowCarbohydrateRatio = Form.useWatch(
+    ["nutritionRatio", CarbohydrateCycleClass.low, "carbohydrateRatio"],
+    form
+  );
+  const lowFatRatio = Form.useWatch(
+    ["nutritionRatio", CarbohydrateCycleClass.low, "fatRatio"],
+    form
+  );
+  const lowDays = Form.useWatch(
+    ["nutritionRatio", CarbohydrateCycleClass.low, "days"],
+    form
+  );
+  const middleCarbohydrateRatio = Form.useWatch(
+    ["nutritionRatio", CarbohydrateCycleClass.middle, "carbohydrateRatio"],
+    form
+  );
+  const middleFatRatio = Form.useWatch(
+    ["nutritionRatio", CarbohydrateCycleClass.middle, "fatRatio"],
+    form
+  );
+  const middleDays = Form.useWatch(
+    ["nutritionRatio", CarbohydrateCycleClass.middle, "days"],
+    form
+  );
+  const highCarbohydrateRatio = Form.useWatch(
+    ["nutritionRatio", CarbohydrateCycleClass.high, "carbohydrateRatio"],
+    form
+  );
+  const highFatRatio = Form.useWatch(
+    ["nutritionRatio", CarbohydrateCycleClass.high, "fatRatio"],
+    form
+  );
+  const highDays = Form.useWatch(
+    ["nutritionRatio", CarbohydrateCycleClass.high, "days"],
+    form
+  );
+
+  useEffect(() => {
+    const value = JSON.parse(getLocalStorage("bodyData") || "{}");
+    form.setFieldsValue(value);
+  }, [form]);
+
+  useEffect(() => {
+    switch (bodyType) {
+      case BodyType.Ectomorph:
+      case BodyType.Endomorph:
+        form.setFieldValue(
+          ["nutritionBase", "carbohydrateBase"],
+          NUTRITION_BASE[bodyType].CARBOHYDRATE
+        );
+        form.setFieldValue(
+          ["nutritionBase", "fatBase"],
+          NUTRITION_BASE[bodyType].FAT
+        );
+        form.setFieldValue(
+          ["nutritionBase", "proteinBase"],
+          NUTRITION_BASE[bodyType].PROTEIN
+        );
+
+        [
+          CarbohydrateCycleClass.low,
+          CarbohydrateCycleClass.middle,
+          CarbohydrateCycleClass.high,
+        ].forEach((key) => {
+          form.setFieldValue(
+            ["nutritionRatio", key, "carbohydrateRatio"],
+            NUTRITION_RATIO[key].CARBOHYDRATE
+          );
+          form.setFieldValue(
+            ["nutritionRatio", key, "fatRatio"],
+            NUTRITION_RATIO[key].FAT
+          );
+          form.setFieldValue(
+            ["nutritionRatio", key, "days"],
+            NUTRITION_RATIO[key].DAY
+          );
+        });
+
+        break;
+      default:
+        break;
+    }
+  }, [bodyType, form]);
+
+  const nutritionStat: NutritionStat = {
+    dayCarbohydrate: Math.round(targetWeight * carbohydrateBase),
+    dayFat: Math.round(targetWeight * fatBase),
+    dayProtein: Math.round(targetWeight * proteinBase),
+    get weekCarbohydrate() {
+      return this.dayCarbohydrate * 7;
+    },
+    get weekFat() {
+      return this.dayFat * 7;
+    },
+    get weekProtein() {
+      return this.dayProtein * 7;
+    },
+  };
 
   const columns = [
     {
@@ -45,8 +163,8 @@ export default function Home() {
       children: [
         {
           title: "中",
-          dataIndex: "Tuesday",
-          key: "Tuesday",
+          dataIndex: "tuesday",
+          key: "tuesday",
         },
       ],
     },
@@ -55,8 +173,8 @@ export default function Home() {
       children: [
         {
           title: "中",
-          dataIndex: "Wednesday",
-          key: "Wednesday",
+          dataIndex: "wednesday",
+          key: "wednesday",
         },
       ],
     },
@@ -65,8 +183,8 @@ export default function Home() {
       children: [
         {
           title: "中",
-          dataIndex: "Thursday",
-          key: "Thursday",
+          dataIndex: "thursday",
+          key: "thursday",
         },
       ],
     },
@@ -75,8 +193,8 @@ export default function Home() {
       children: [
         {
           title: "中",
-          dataIndex: "Friday",
-          key: "Friday",
+          dataIndex: "friday",
+          key: "friday",
         },
       ],
     },
@@ -85,8 +203,8 @@ export default function Home() {
       children: [
         {
           title: "中",
-          dataIndex: "Saturday",
-          key: "Saturday",
+          dataIndex: "saturday",
+          key: "saturday",
         },
       ],
     },
@@ -95,8 +213,8 @@ export default function Home() {
       children: [
         {
           title: "中",
-          dataIndex: "Sunday",
-          key: "Sunday",
+          dataIndex: "sunday",
+          key: "sunday",
         },
       ],
     },
@@ -104,52 +222,77 @@ export default function Home() {
 
   const data = [
     {
-      title: "碳水(g)",
-      monday: 184,
+      type: CarbohydrateCycleClass.low,
+      days: lowDays,
+      carbohydrateRatio: lowCarbohydrateRatio,
+      fatRatio: lowFatRatio,
     },
-  ];
+    {
+      type: CarbohydrateCycleClass.middle,
+      days: middleDays,
+      carbohydrateRatio: middleCarbohydrateRatio,
+      fatRatio: middleFatRatio,
+    },
+    {
+      type: CarbohydrateCycleClass.high,
+      days: highDays,
+      carbohydrateRatio: highCarbohydrateRatio,
+      fatRatio: highFatRatio,
+    },
+  ]
+    .map((item) =>
+      Array.from({ length: item.days }, () => {
+        return {
+          ...item,
+          carbohydrate: Math.round(
+            (nutritionStat.weekCarbohydrate * item.carbohydrateRatio) /
+              100 /
+              item.days
+          ),
+          fat: Math.round(
+            (nutritionStat.weekFat * item.fatRatio) / 100 / item.days
+          ),
+          protein: Math.round(weight * proteinBase),
+        };
+      })
+    )
+    .flat()
+    .reduce<({ title: string } & { [key in Day]: number })[]>(
+      (res, cur, curIndex) => {
+        for (let i = 0; i < STAT_OPTIONS.length; i++) {
+          if (!res[i]) {
+            res[i] = { title: STAT_OPTIONS[i].label } as { title: string } & {
+              [key in Day]: number;
+            };
+          }
+          const val = res[i];
+          const days = Object.values(Day);
+          const metaValMap = {
+            [StatMeta.carbohydrates]: cur.carbohydrate,
+            [StatMeta.fat]: cur.fat,
+            [StatMeta.protein]: cur.protein,
+            [StatMeta.calories]:
+              cur.carbohydrate * NUTRITION_ENERGY.carbohydrates +
+              cur.fat * NUTRITION_ENERGY.fat +
+              cur.protein * NUTRITION_ENERGY.protein,
+          };
 
-  const bodyType = Form.useWatch("bodyType", form);
-  const weight = Form.useWatch("weight", form);
-  const carbohydrates = Form.useWatch("carbohydrates", form);
-  const fat = Form.useWatch("fat", form);
-  const protein = Form.useWatch("protein", form);
-
-  useEffect(() => {
-    switch (bodyType) {
-      case BodyType.Ectomorph:
-        form.setFieldValue("carbohydrates", 3);
-        form.setFieldValue("fat", 1);
-        form.setFieldValue("protein", 1.2);
-        break;
-      case BodyType.Mesomorph:
-        break;
-      case BodyType.Endomorph:
-        form.setFieldValue("carbohydrates", 2);
-        form.setFieldValue("fat", 0.8);
-        form.setFieldValue("protein", 1.2);
-        break;
-      default:
-        break;
-    }
-  }, [bodyType, weight, form]);
-
+          val[days[curIndex]] = metaValMap[STAT_OPTIONS[i].value];
+        }
+        return res;
+      },
+      []
+    );
+  console.log(data);
   return (
     <div id="app">
-      <div className="flex columns-2">
-        <aside>
+      <div className="flex">
+        <aside className="w-md">
           <Form
             form={form}
-            initialValues={JSON.parse(
-              typeof window !== "undefined"
-                ? localStorage.getItem("bodyData") || "{}"
-                : "{}"
-            )}
             onFieldsChange={() => {
               const values = form.getFieldsValue();
-              if (typeof window !== "undefined") {
-                localStorage.setItem("bodyData", JSON.stringify(values));
-              }
+              setLocalStorage("bodyData", values);
             }}
           >
             <Space direction="vertical" size="small">
@@ -157,100 +300,187 @@ export default function Home() {
                 <div className="font-mono text-lg mb-2 border-b-1 ">
                   基础信息
                 </div>
-                <Form.Item colon label="体重(kg)" name="weight">
-                  <Input type="number" />
-                </Form.Item>
-                <Form.Item colon label="身高(cm)" name="height">
-                  <Input type="number" />
-                </Form.Item>
-                <Form.Item colon label="年龄" name="age">
-                  <Input type="number" />
-                </Form.Item>
-                <Form.Item colon label="性别" name="gender">
-                  <Radio.Group buttonStyle="solid">
-                    <Radio.Button value={Gender.Male}>男性</Radio.Button>
-                    <Radio.Button value={Gender.Female}>女性</Radio.Button>
-                  </Radio.Group>
-                </Form.Item>
-                <Form.Item colon label="胚型" name="bodyType">
-                  <Radio.Group buttonStyle="solid">
-                    <Radio.Button value={BodyType.Ectomorph}>
-                      外胚型
-                    </Radio.Button>
-                    <Radio.Button value={BodyType.Mesomorph}>
-                      中胚型
-                    </Radio.Button>
-                    <Radio.Button value={BodyType.Endomorph}>
-                      内胚型
-                    </Radio.Button>
-                  </Radio.Group>
-                </Form.Item>
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <Form.Item
+                      layout="vertical"
+                      label="当前体重"
+                      name={["basicInfo", "weight"]}
+                    >
+                      <InputNumber style={{ width: "100%" }} suffix="kg" />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item
+                      layout="vertical"
+                      label="目标体重"
+                      name={["basicInfo", "targetWeight"]}
+                      extra="与当前体重差距不同超过5kg"
+                    >
+                      <InputNumber style={{ width: "100%" }} suffix="kg" />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item
+                      layout="vertical"
+                      label="身高"
+                      name={["basicInfo", "height"]}
+                    >
+                      <InputNumber style={{ width: "100%" }} suffix="cm" />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item
+                      layout="vertical"
+                      label="年龄"
+                      name={["basicInfo", "age"]}
+                    >
+                      <InputNumber style={{ width: "100%" }} />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                <Row gutter={16}>
+                  <Col span={8}>
+                    <Form.Item
+                      layout="vertical"
+                      label="性别"
+                      name={["basicInfo", "gender"]}
+                    >
+                      <Radio.Group buttonStyle="solid">
+                        {GENDER_OPTIONS.map((item) => (
+                          <Radio.Button key={item.value} value={item.value}>
+                            {item.label}
+                          </Radio.Button>
+                        ))}
+                      </Radio.Group>
+                    </Form.Item>
+                  </Col>
+                  <Col span={16}>
+                    <Form.Item
+                      layout="vertical"
+                      label="胚型"
+                      name={["basicInfo", "bodyType"]}
+                    >
+                      <Radio.Group buttonStyle="solid">
+                        {BODY_TYPE_OPTIONS.map((item) => (
+                          <Radio.Button key={item.value} value={item.value}>
+                            {item.label}
+                          </Radio.Button>
+                        ))}
+                      </Radio.Group>
+                    </Form.Item>
+                  </Col>
+                </Row>
               </div>
               <div className="px-4">
                 <div className="font-mono text-lg mb-2 border-b-1 ">
                   三大宏观营养素
                 </div>
-                <Form.Item colon label="碳水化合物(g/kg)" name="carbohydrates">
-                  <Input type="number" />
-                </Form.Item>
-                <Form.Item colon label="蛋白质(g/kg)" name="protein">
-                  <Input type="number" />
-                </Form.Item>
-                <Form.Item colon label="脂肪(g/kg)" name="fat">
-                  <Input type="number" />
-                </Form.Item>
+                <Row gutter={16}>
+                  <Col span={8}>
+                    <Form.Item
+                      layout="vertical"
+                      label="碳水基数"
+                      name={["nutritionBase", "carbohydrateBase"]}
+                      extra="内胚型建议2，外胚型建议3"
+                    >
+                      <InputNumber style={{ width: "100%" }} suffix="g/kg" />
+                    </Form.Item>
+                  </Col>
+                  <Col span={8}>
+                    <Form.Item
+                      layout="vertical"
+                      label="脂肪基数"
+                      name={["nutritionBase", "fatBase"]}
+                      extra="内胚型建议0.8g，外胚型建议1-2g"
+                    >
+                      <InputNumber style={{ width: "100%" }} suffix="g/kg" />
+                    </Form.Item>
+                  </Col>
+                  <Col span={8}>
+                    <Form.Item
+                      layout="vertical"
+                      label="蛋白质基数"
+                      name={["nutritionBase", "proteinBase"]}
+                      extra="建议0.8-1.5"
+                    >
+                      <InputNumber style={{ width: "100%" }} suffix="g/kg" />
+                    </Form.Item>
+                  </Col>
+                </Row>
               </div>
               <div className="px-4">
                 <div className="font-mono text-lg mb-2 border-b-1 ">
-                  训练计划
+                  营养素比例
                 </div>
-                <Form.Item colon label="碳水化合物(g/kg)" name="carbohydrates">
-                  <Input type="number" />
-                </Form.Item>
-                <Form.Item colon label="蛋白质(g/kg)" name="protein">
-                  <Input type="number" />
-                </Form.Item>
-                <Form.Item colon label="脂肪(g/kg)" name="fat">
-                  <Input type="number" />
-                </Form.Item>
+                {CARBOHYDRATE_CYCLE_CLASS_OPTIONS.map((item) => (
+                  <div key={item.value}>
+                    <div>{item.label}</div>
+                    <Row gutter={16}>
+                      <Col span={8}>
+                        <Form.Item
+                          layout="vertical"
+                          label="天数"
+                          name={["nutritionRatio", item.value, "days"]}
+                        >
+                          <InputNumber style={{ width: "100%" }} suffix="天" />
+                        </Form.Item>
+                      </Col>
+                      <Col span={8}>
+                        <Form.Item
+                          layout="vertical"
+                          label="碳水比例"
+                          name={[
+                            "nutritionRatio",
+                            item.value,
+                            "carbohydrateRatio",
+                          ]}
+                        >
+                          <InputNumber style={{ width: "100%" }} suffix="%" />
+                        </Form.Item>
+                      </Col>
+                      <Col span={8}>
+                        <Form.Item
+                          layout="vertical"
+                          label="脂肪比例"
+                          name={["nutritionRatio", item.value, "fatRatio"]}
+                        >
+                          <InputNumber style={{ width: "100%" }} suffix="%" />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  </div>
+                ))}
               </div>
             </Space>
           </Form>
         </aside>
         <main className="flex-1 p-8">
-          <div className="grid grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-3 gap-4 mb-8">
             {[
               {
-                title: "基础代谢",
-                value: 1,
-              },
-              {
-                title: "每日总消耗",
-                value: 1,
-              },
-              {
                 title: "日总碳水(g)",
-                value: carbohydrates * weight || 0,
-              },
-              {
-                title: "周总碳水(g)",
-                value: carbohydrates * weight * 7 || 0,
-              },
-              {
-                title: "日总蛋白质(g)",
-                value: protein * weight || 0,
-              },
-              {
-                title: "周总蛋白质(g)",
-                value: protein * weight * 7 || 0,
+                value: nutritionStat.dayCarbohydrate,
               },
               {
                 title: "日总脂肪(g)",
-                value: fat * weight || 0,
+                value: nutritionStat.dayFat,
+              },
+              {
+                title: "日总蛋白质(g)",
+                value: nutritionStat.dayProtein,
+              },
+              {
+                title: "周总碳水(g)",
+                value: nutritionStat.weekCarbohydrate,
               },
               {
                 title: "周总脂肪(g)",
-                value: fat * weight * 7 || 0,
+                value: nutritionStat.weekFat,
+              },
+              {
+                title: "周总蛋白质(g)",
+                value: nutritionStat.weekProtein,
               },
             ].map((item) => (
               <div key={item.title} className="flex flex-col items-center">
@@ -262,6 +492,68 @@ export default function Home() {
                 />
               </div>
             ))}
+          </div>
+          <div>
+            <List
+              grid={{ gutter: 16, column: 3 }}
+              dataSource={[
+                {
+                  title: "低碳日",
+                  carbohydrateRatio: lowCarbohydrateRatio,
+                  fatRatio: lowFatRatio,
+                  days: lowDays,
+                },
+                {
+                  title: "高碳日",
+                  carbohydrateRatio: middleCarbohydrateRatio,
+                  fatRatio: middleFatRatio,
+                  days: middleDays,
+                },
+                {
+                  title: "中碳日",
+                  carbohydrateRatio: highCarbohydrateRatio,
+                  fatRatio: highFatRatio,
+                  days: highDays,
+                },
+              ]}
+              renderItem={(item) => {
+                const carbohydrate = Math.round(
+                  (nutritionStat.weekCarbohydrate * item.carbohydrateRatio) /
+                    100 /
+                    item.days
+                );
+                const fat = Math.round(
+                  (nutritionStat.weekFat * item.fatRatio) / 100 / item.days
+                );
+                const protein = weight * proteinBase;
+                return (
+                  <List.Item>
+                    <Card
+                      title={`${item.title}(${item.days}天)`}
+                      actions={[
+                        <div key={item.title}>
+                          热量:{carbohydrate * 4 + fat * 9 + protein * 4}
+                        </div>,
+                      ]}
+                    >
+                      <div className="flex flex-col gap-2">
+                        <div>
+                          碳水: 周总碳水✖️{item.carbohydrateRatio}%/
+                          {item.days}={carbohydrate}
+                        </div>
+                        <div>
+                          脂肪: 周总脂肪✖️{item.fatRatio}%/{item.days}={fat}
+                        </div>
+                        <div>
+                          蛋白质: 当前体重✖️蛋白质=
+                          {protein}
+                        </div>
+                      </div>
+                    </Card>
+                  </List.Item>
+                );
+              }}
+            />
           </div>
           <div>
             <Table
