@@ -13,7 +13,6 @@ import {
   Table,
 } from "antd";
 
-import "./global.css";
 import { useEffect } from "react";
 import {
   BODY_TYPE_OPTIONS,
