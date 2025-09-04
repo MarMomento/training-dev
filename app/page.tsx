@@ -370,7 +370,7 @@ export default function Home() {
                     >
                       <Select
                         options={ACTIVITY_COEFFICIENT_OPTIONS}
-                        popupMatchSelectWidth={150}
+                        popupMatchSelectWidth={170}
                       />
                     </Form.Item>
                   </Col>
