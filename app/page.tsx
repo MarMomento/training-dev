@@ -5,7 +5,6 @@ import {
   Col,
   Form,
   InputNumber,
-  List,
   Radio,
   Row,
   Select,
@@ -369,7 +368,10 @@ export default function Home() {
                       label="运动系数"
                       name={["basicInfo", "activityCoefficient"]}
                     >
-                      <Select options={ACTIVITY_COEFFICIENT_OPTIONS} />
+                      <Select
+                        options={ACTIVITY_COEFFICIENT_OPTIONS}
+                        popupMatchSelectWidth={150}
+                      />
                     </Form.Item>
                   </Col>
                   <Col span={8}>
@@ -598,7 +600,7 @@ export default function Home() {
               })}
             </div>
           </div>
-          <div>
+          <div className="overflow-x-scroll">
             <Table
               columns={columns}
               dataSource={data}
