@@ -59,6 +59,8 @@ export type TrainVariables = {
   basicInfo: BodyMeta & {
     /** 目标体重 */
     targetWeight: number;
+    /** 活度系数 */
+    activityCoefficient: number;
   };
   nutritionBase: NutritionBase;
   nutritionRatio: CarbohydrateCycleNutritionRatio;

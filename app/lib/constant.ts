@@ -113,3 +113,34 @@ export const NUTRITION_ENERGY = {
   fat: 9,
   protein: 4,
 };
+
+export enum ActivityCoefficient {
+  zero = 1.2,
+  oneToThree = 1.375,
+  threeToFive = 1.55,
+  sixToSeven = 1.72,
+  sevenMore = 1.9,
+}
+
+export const ACTIVITY_COEFFICIENT_OPTIONS = [
+  {
+    value: ActivityCoefficient.zero,
+    label: "几乎不运动",
+  },
+  {
+    value: ActivityCoefficient.oneToThree,
+    label: "每周运动1-3天",
+  },
+  {
+    value: ActivityCoefficient.threeToFive,
+    label: "每周运动3-5天",
+  },
+  {
+    value: ActivityCoefficient.sixToSeven,
+    label: "每周运动6-7天",
+  },
+  {
+    value: ActivityCoefficient.sevenMore,
+    label: "长时间运动体力劳动",
+  },
+];

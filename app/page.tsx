@@ -8,6 +8,7 @@ import {
   List,
   Radio,
   Row,
+  Select,
   Space,
   Statistic,
   Table,
@@ -26,6 +27,8 @@ import {
   NUTRITION_RATIO,
   STAT_OPTIONS,
   StatMeta,
+  Gender,
+  ACTIVITY_COEFFICIENT_OPTIONS,
 } from "./lib/constant";
 import { NutritionStat, TrainVariables } from "./lib/type";
 import { getLocalStorage, setLocalStorage } from "./lib/storage";
@@ -35,6 +38,13 @@ export default function Home() {
 
   const bodyType = Form.useWatch(["basicInfo", "bodyType"], form);
   const weight = Form.useWatch(["basicInfo", "weight"], form);
+  const age = Form.useWatch(["basicInfo", "age"], form);
+  const gender = Form.useWatch(["basicInfo", "gender"], form);
+  const activityCoefficient = Form.useWatch(
+    ["basicInfo", "activityCoefficient"],
+    form
+  );
+  const height = Form.useWatch(["basicInfo", "height"], form);
   const targetWeight = Form.useWatch(["basicInfo", "targetWeight"], form);
   const carbohydrateBase = Form.useWatch(
     ["nutritionBase", "carbohydrateBase"],
@@ -129,7 +139,7 @@ export default function Home() {
   const nutritionStat: NutritionStat = {
     dayCarbohydrate: Math.round(targetWeight * carbohydrateBase),
     dayFat: Math.round(targetWeight * fatBase),
-    dayProtein: Math.round(targetWeight * proteinBase),
+    dayProtein: Math.round(weight * proteinBase),
     get weekCarbohydrate() {
       return this.dayCarbohydrate * 7;
     },
@@ -138,6 +148,22 @@ export default function Home() {
     },
     get weekProtein() {
       return this.dayProtein * 7;
+    },
+  };
+
+  const bodyStat = {
+    bmi: Number((weight / Math.pow(height / 100, 2)).toFixed(1)),
+    bmr:
+      weight && height && age && gender
+        ? Math.round(
+            9.99 * weight +
+              6.25 * height -
+              4.92 * age +
+              (166 * (gender === Gender.Male ? 1 : 0) - 161)
+          )
+        : 0,
+    get tdee() {
+      return Math.round(this.bmr * activityCoefficient);
     },
   };
 
@@ -300,7 +326,7 @@ export default function Home() {
                   基础信息
                 </div>
                 <Row gutter={16}>
-                  <Col span={12}>
+                  <Col span={8}>
                     <Form.Item
                       layout="vertical"
                       label="当前体重"
@@ -309,7 +335,7 @@ export default function Home() {
                       <InputNumber style={{ width: "100%" }} suffix="kg" />
                     </Form.Item>
                   </Col>
-                  <Col span={12}>
+                  <Col span={8}>
                     <Form.Item
                       layout="vertical"
                       label="目标体重"
@@ -319,7 +345,7 @@ export default function Home() {
                       <InputNumber style={{ width: "100%" }} suffix="kg" />
                     </Form.Item>
                   </Col>
-                  <Col span={12}>
+                  <Col span={8}>
                     <Form.Item
                       layout="vertical"
                       label="身高"
@@ -328,7 +354,7 @@ export default function Home() {
                       <InputNumber style={{ width: "100%" }} suffix="cm" />
                     </Form.Item>
                   </Col>
-                  <Col span={12}>
+                  <Col span={8}>
                     <Form.Item
                       layout="vertical"
                       label="年龄"
@@ -337,8 +363,15 @@ export default function Home() {
                       <InputNumber style={{ width: "100%" }} />
                     </Form.Item>
                   </Col>
-                </Row>
-                <Row gutter={16}>
+                  <Col span={8}>
+                    <Form.Item
+                      layout="vertical"
+                      label="运动系数"
+                      name={["basicInfo", "activityCoefficient"]}
+                    >
+                      <Select options={ACTIVITY_COEFFICIENT_OPTIONS} />
+                    </Form.Item>
+                  </Col>
                   <Col span={8}>
                     <Form.Item
                       layout="vertical"
@@ -458,6 +491,19 @@ export default function Home() {
           <div className="grid grid-cols-3 gap-4 mb-8">
             {[
               {
+                title: "BMI",
+                value: bodyStat.bmi,
+                precision: 1,
+              },
+              {
+                title: "BMR",
+                value: bodyStat.bmr,
+              },
+              {
+                title: "TDEE(每日总热量消耗)",
+                value: bodyStat.tdee,
+              },
+              {
                 title: "日总碳水(g)",
                 value: nutritionStat.dayCarbohydrate,
               },
@@ -482,14 +528,13 @@ export default function Home() {
                 value: nutritionStat.weekProtein,
               },
             ].map((item) => (
-              <div key={item.title} className="flex flex-col items-center">
-                <Statistic
-                  title={item.title}
-                  value={item.value || 0}
-                  precision={0}
-                  style={{ textAlign: "center" }}
-                />
-              </div>
+              <Statistic
+                key={item.title}
+                title={item.title}
+                value={item.value || 0}
+                precision={item.precision || 0}
+                style={{ textAlign: "center" }}
+              />
             ))}
           </div>
           <div>
