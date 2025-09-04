@@ -282,7 +282,7 @@ export default function Home() {
       },
       []
     );
-  console.log(data);
+
   return (
     <div id="app">
       <div className="flex">
@@ -485,7 +485,7 @@ export default function Home() {
               <div key={item.title} className="flex flex-col items-center">
                 <Statistic
                   title={item.title}
-                  value={item.value}
+                  value={item.value || 0}
                   precision={0}
                   style={{ textAlign: "center" }}
                 />
@@ -516,19 +516,21 @@ export default function Home() {
                 },
               ]}
               renderItem={(item) => {
-                const carbohydrate = Math.round(
-                  (nutritionStat.weekCarbohydrate * item.carbohydrateRatio) /
-                    100 /
-                    item.days
-                );
-                const fat = Math.round(
-                  (nutritionStat.weekFat * item.fatRatio) / 100 / item.days
-                );
-                const protein = weight * proteinBase;
+                const carbohydrate =
+                  Math.round(
+                    (nutritionStat.weekCarbohydrate * item.carbohydrateRatio) /
+                      100 /
+                      item.days
+                  ) || 0;
+                const fat =
+                  Math.round(
+                    (nutritionStat.weekFat * item.fatRatio) / 100 / item.days
+                  ) || 0;
+                const protein = weight * proteinBase || 0;
                 return (
                   <List.Item>
                     <Card
-                      title={`${item.title}(${item.days}天)`}
+                      title={`${item.title}(${item.days || 0}天)`}
                       actions={[
                         <div key={item.title}>
                           热量:{carbohydrate * 4 + fat * 9 + protein * 4}
