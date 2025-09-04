@@ -311,8 +311,8 @@ export default function Home() {
 
   return (
     <div id="app">
-      <div className="flex">
-        <aside className="w-md">
+      <div className="flex max-md:flex-col">
+        <aside className="md:w-md max-md:flex-1">
           <Form
             form={form}
             onFieldsChange={() => {
@@ -538,9 +538,8 @@ export default function Home() {
             ))}
           </div>
           <div>
-            <List
-              grid={{ gutter: 16, column: 3 }}
-              dataSource={[
+            <div className="grid grid-cols-3 gap-4 pb-4 max-md:grid-cols-1">
+              {[
                 {
                   title: "低碳日",
                   carbohydrateRatio: lowCarbohydrateRatio,
@@ -559,8 +558,7 @@ export default function Home() {
                   fatRatio: highFatRatio,
                   days: highDays,
                 },
-              ]}
-              renderItem={(item) => {
+              ].map((item) => {
                 const carbohydrate =
                   Math.round(
                     (nutritionStat.weekCarbohydrate * item.carbohydrateRatio) /
@@ -573,33 +571,32 @@ export default function Home() {
                   ) || 0;
                 const protein = weight * proteinBase || 0;
                 return (
-                  <List.Item>
-                    <Card
-                      title={`${item.title}(${item.days || 0}天)`}
-                      actions={[
-                        <div key={item.title}>
-                          热量:{carbohydrate * 4 + fat * 9 + protein * 4}
-                        </div>,
-                      ]}
-                    >
-                      <div className="flex flex-col gap-2">
-                        <div>
-                          碳水: 周总碳水✖️{item.carbohydrateRatio}%/
-                          {item.days}={carbohydrate}
-                        </div>
-                        <div>
-                          脂肪: 周总脂肪✖️{item.fatRatio}%/{item.days}={fat}
-                        </div>
-                        <div>
-                          蛋白质: 当前体重✖️蛋白质=
-                          {protein}
-                        </div>
+                  <Card
+                    key={item.title}
+                    title={`${item.title}(${item.days || 0}天)`}
+                    actions={[
+                      <div key={item.title}>
+                        热量:{carbohydrate * 4 + fat * 9 + protein * 4}
+                      </div>,
+                    ]}
+                  >
+                    <div className="flex flex-col gap-2">
+                      <div>
+                        碳水: 周总碳水✖️{item.carbohydrateRatio}%/
+                        {item.days}={carbohydrate}
                       </div>
-                    </Card>
-                  </List.Item>
+                      <div>
+                        脂肪: 周总脂肪✖️{item.fatRatio}%/{item.days}={fat}
+                      </div>
+                      <div>
+                        蛋白质: 当前体重✖️蛋白质=
+                        {protein}
+                      </div>
+                    </div>
+                  </Card>
                 );
-              }}
-            />
+              })}
+            </div>
           </div>
           <div>
             <Table
